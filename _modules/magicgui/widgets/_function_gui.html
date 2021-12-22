@@ -56,8 +56,10 @@
         <span class=c1 ># if using napoleon style google docstringss</span>
         <span class=n >argname</span> <span class=o >=</span> <span class=n >name</span><span class=o >.</span><span class=n >split</span><span class=p >(</span><span class=s2 >" "</span><span class=p >,</span> <span class=n >maxsplit</span><span class=o >=</span><span class=mi >1</span><span class=p >)[</span><span class=mi >0</span><span class=p >]</span>
         <span class=n >desc</span> <span class=o >=</span> <span class=n >description</span><span class=o >.</span><span class=n >replace</span><span class=p >(</span><span class=s2 >"`"</span><span class=p >,</span> <span class=s2 >""</span><span class=p >)</span> <span class=k >if</span> <span class=n >description</span> <span class=k >else</span> <span class=s2 >""</span>
-        <span class=c1 ># use setdefault so as not to override an explicitly provided tooltip</span>
-        <span class=n >sig</span><span class=o >.</span><span class=n >parameters</span><span class=p >[</span><span class=n >argname</span><span class=p >]</span><span class=o >.</span><span class=n >options</span><span class=o >.</span><span class=n >setdefault</span><span class=p >(</span><span class=s2 >"tooltip"</span><span class=p >,</span> <span class=n >desc</span><span class=p >)</span>
+        <span class=c1 ># some docstring params may be mislabeled and not appear in the params</span>
+        <span class=k >if</span> <span class=n >argname</span> <span class=ow >in</span> <span class=n >sig</span><span class=o >.</span><span class=n >parameters</span><span class=p >:</span>
+            <span class=c1 ># use setdefault so as not to override an explicitly provided tooltip</span>
+            <span class=n >sig</span><span class=o >.</span><span class=n >parameters</span><span class=p >[</span><span class=n >argname</span><span class=p >]</span><span class=o >.</span><span class=n >options</span><span class=o >.</span><span class=n >setdefault</span><span class=p >(</span><span class=s2 >"tooltip"</span><span class=p >,</span> <span class=n >desc</span><span class=p >)</span>
 
 
 <span class=n >_R</span> <span class=o >=</span> <span class=n >TypeVar</span><span class=p >(</span><span class=s2 >"_R"</span><span class=p >)</span>
