@@ -160,12 +160,11 @@
         <span class=c1 ># https://github.com/python/mypy/issues/9934</span>
         <span class=n >name</span> <span class=o >=</span> <span class=nb >getattr</span><span class=p >(</span><span class=n >function</span><span class=p >,</span> <span class=s2 >"__name__"</span><span class=p >,</span> <span class=kc >None</span><span class=p >)</span>
         <span class=k >if</span> <span class=ow >not</span> <span class=n >name</span><span class=p >:</span>
-            <span class=k >try</span><span class=p >:</span>
-                <span class=n >name</span> <span class=o >=</span> <span class=sa >f</span><span class=s2 >"</span><span class=si >{</span><span class=n >function</span><span class=o >.</span><span class=vm >__module__</span><span class=si >}</span><span class=s2 >.</span><span class=si >{</span><span class=n >function</span><span class=o >.</span><span class=vm >__class__</span><span class=si >}</span><span class=s2 >"</span>
-            <span class=k >except</span> <span class=ne >AttributeError</span><span class=p >:</span>
-                <span class=c1 ># partials</span>
+            <span class=k >if</span> <span class=nb >hasattr</span><span class=p >(</span><span class=n >function</span><span class=p >,</span> <span class=s2 >"func"</span><span class=p >):</span>  <span class=c1 ># partials:</span>
                 <span class=n >f</span> <span class=o >=</span> <span class=nb >getattr</span><span class=p >(</span><span class=n >function</span><span class=p >,</span> <span class=s2 >"func"</span><span class=p >,</span> <span class=kc >None</span><span class=p >)</span>
                 <span class=n >name</span> <span class=o >=</span> <span class=nb >getattr</span><span class=p >(</span><span class=n >f</span><span class=p >,</span> <span class=s2 >"__name__"</span><span class=p >,</span> <span class=kc >None</span><span class=p >)</span> <span class=ow >or</span> <span class=nb >str</span><span class=p >(</span><span class=n >function</span><span class=p >)</span>
+            <span class=k >else</span><span class=p >:</span>
+                <span class=n >name</span> <span class=o >=</span> <span class=sa >f</span><span class=s2 >"</span><span class=si >{</span><span class=n >function</span><span class=o >.</span><span class=vm >__module__</span><span class=si >}</span><span class=s2 >.</span><span class=si >{</span><span class=n >function</span><span class=o >.</span><span class=vm >__class__</span><span class=si >}</span><span class=s2 >"</span>
         <span class=bp >self</span><span class=o >.</span><span class=n >_callable_name</span> <span class=o >=</span> <span class=n >name</span>
 
         <span class=nb >super</span><span class=p >()</span><span class=o >.</span><span class=fm >__init__</span><span class=p >(</span>
