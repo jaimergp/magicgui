@@ -25,6 +25,9 @@
 <span class=c1 >#: A function that takes a ``(value, annotation)`` argument and returns an optional</span>
 <span class=c1 >#: :attr:`WidgetTuple`</span>
 <span class=n >TypeMatcher</span> <span class=o >=</span> <span class=n >Callable</span><span class=p >[[</span><span class=n >Any</span><span class=p >,</span> <span class=n >Optional</span><span class=p >[</span><span class=n >Type</span><span class=p >]],</span> <span class=n >Optional</span><span class=p >[</span><span class=n >WidgetTuple</span><span class=p >]]</span>
+<span class=c1 >#: A function that takes a ``(value, annotation)`` argument and returns an optional</span>
+<span class=c1 >#: :attr:`WidgetTuple`</span>
+<span class=n >ReturnMatcher</span> <span class=o >=</span> <span class=n >Callable</span><span class=p >[[</span><span class=n >Any</span><span class=p >,</span> <span class=n >Optional</span><span class=p >[</span><span class=n >Type</span><span class=p >]],</span> <span class=n >Optional</span><span class=p >[</span><span class=n >WidgetTuple</span><span class=p >]]</span>
 <span class=c1 >#: An iterable that can be used as a valid argument for widget ``choices``</span>
 <span class=n >ChoicesIterable</span> <span class=o >=</span> <span class=n >Union</span><span class=p >[</span><span class=n >Iterable</span><span class=p >[</span><span class=n >Tuple</span><span class=p >[</span><span class=nb >str</span><span class=p >,</span> <span class=n >Any</span><span class=p >]],</span> <span class=n >Iterable</span><span class=p >[</span><span class=n >Any</span><span class=p >]]</span>
 <span class=c1 >#: An callback that can be used as a valid argument for widget ``choices``.  It takes</span>

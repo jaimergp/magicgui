@@ -44,6 +44,7 @@
 
 
 <span class=n >_RETURN_CALLBACKS</span><span class=p >:</span> <span class=n >DefaultDict</span><span class=p >[</span><span class=nb >type</span><span class=p >,</span> <span class=nb >list</span><span class=p >[</span><span class=n >ReturnCallback</span><span class=p >]]</span> <span class=o >=</span> <span class=n >defaultdict</span><span class=p >(</span><span class=nb >list</span><span class=p >)</span>
+<span class=n >_RETURN_MATCHERS</span><span class=p >:</span> <span class=nb >list</span><span class=p >[</span><span class=n >TypeMatcher</span><span class=p >]</span> <span class=o >=</span> <span class=nb >list</span><span class=p >()</span>
 <span class=n >_TYPE_MATCHERS</span><span class=p >:</span> <span class=nb >list</span><span class=p >[</span><span class=n >TypeMatcher</span><span class=p >]</span> <span class=o >=</span> <span class=nb >list</span><span class=p >()</span>
 <span class=n >_TYPE_DEFS</span><span class=p >:</span> <span class=nb >dict</span><span class=p >[</span><span class=nb >type</span><span class=p >,</span> <span class=n >WidgetTuple</span><span class=p >]</span> <span class=o >=</span> <span class=nb >dict</span><span class=p >()</span>
 
@@ -111,6 +112,19 @@
 <span class=sd >    """</span>
     <span class=n >_TYPE_MATCHERS</span><span class=o >.</span><span class=n >append</span><span class=p >(</span><span class=n >func</span><span class=p >)</span>
     <span class=k >return</span> <span class=n >func</span></div>
+
+
+<span class=k >def</span> <span class=nf >return_matcher</span><span class=p >(</span><span class=n >func</span><span class=p >:</span> <span class=n >TypeMatcher</span><span class=p >)</span> <span class=o >-&gt;</span> <span class=n >TypeMatcher</span><span class=p >:</span>
+    <span class=sd >"""Add function to the set of return matchers.</span>
+
+<span class=sd >    Example</span>
+<span class=sd >    -------</span>
+<span class=sd >    &gt;&gt;&gt; @return_matcher</span>
+<span class=sd >    ... def default_return_widget(value, annotation):</span>
+<span class=sd >    ...     return widgets.LineEdit, {}</span>
+<span class=sd >    """</span>
+    <span class=n >_RETURN_MATCHERS</span><span class=o >.</span><span class=n >append</span><span class=p >(</span><span class=n >func</span><span class=p >)</span>
+    <span class=k >return</span> <span class=n >func</span>
 
 
 <span class=n >_SIMPLE_ANNOTATIONS</span> <span class=o >=</span> <span class=p >{</span>
@@ -226,10 +240,91 @@
     <span class=k >return</span> <span class=n >widgets</span><span class=o >.</span><span class=n >EmptyWidget</span><span class=p >,</span> <span class=p >{</span><span class=s2 >"visible"</span><span class=p >:</span> <span class=kc >False</span><span class=p >}</span>
 
 
+<span class=n >_SIMPLE_RETURN_TYPES</span> <span class=o >=</span> <span class=p >[</span>
+    <span class=nb >bool</span><span class=p >,</span>
+    <span class=nb >int</span><span class=p >,</span>
+    <span class=nb >float</span><span class=p >,</span>
+    <span class=nb >str</span><span class=p >,</span>
+    <span class=n >pathlib</span><span class=o >.</span><span class=n >Path</span><span class=p >,</span>
+    <span class=n >datetime</span><span class=o >.</span><span class=n >time</span><span class=p >,</span>
+    <span class=n >datetime</span><span class=o >.</span><span class=n >date</span><span class=p >,</span>
+    <span class=n >datetime</span><span class=o >.</span><span class=n >datetime</span><span class=p >,</span>
+    <span class=nb >range</span><span class=p >,</span>
+    <span class=nb >slice</span><span class=p >,</span>
+<span class=p >]</span>
+
+
+<span class=nd >@return_matcher</span>
+<span class=k >def</span> <span class=nf >default_return_matcher</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span> <span class=o >-&gt;</span> <span class=n >WidgetTuple</span> <span class=o >|</span> <span class=kc >None</span><span class=p >:</span>
+    <span class=sd >"""Checks for 'simple' types that fit in a LineEdit."""</span>
+    <span class=n >dtype</span><span class=p >,</span> <span class=n >optional</span> <span class=o >=</span> <span class=n >_normalize_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span>
+    <span class=k >if</span> <span class=n >dtype</span> <span class=ow >in</span> <span class=n >_SIMPLE_TYPES</span><span class=p >:</span>
+        <span class=k >return</span> <span class=n >widgets</span><span class=o >.</span><span class=n >LineEdit</span><span class=p >,</span> <span class=p >{</span><span class=s2 >"gui_only"</span><span class=p >:</span> <span class=kc >True</span><span class=p >}</span>
+    <span class=k >else</span><span class=p >:</span>
+        <span class=k >return</span> <span class=kc >None</span>
+
+
+<span class=nd >@return_matcher</span>
+<span class=k >def</span> <span class=nf >tabular_return_matcher</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span> <span class=o >-&gt;</span> <span class=n >WidgetTuple</span> <span class=o >|</span> <span class=kc >None</span><span class=p >:</span>
+    <span class=sd >"""Checks for tabular data."""</span>
+    <span class=c1 ># TODO: is this correct?</span>
+    <span class=k >if</span> <span class=n >annotation</span> <span class=o >==</span> <span class=n >inspect</span><span class=o >.</span><span class=n >_empty</span><span class=p >:</span>
+        <span class=k >return</span> <span class=kc >None</span>
+    <span class=n >dtype</span><span class=p >,</span> <span class=n >optional</span> <span class=o >=</span> <span class=n >_normalize_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span>
+    <span class=n >args</span> <span class=o >=</span> <span class=p >[</span><span class=n >_evaluate_forwardref</span><span class=p >(</span><span class=n >a</span><span class=p >)</span> <span class=k >for</span> <span class=n >a</span> <span class=ow >in</span> <span class=n >get_args</span><span class=p >(</span><span class=n >widgets</span><span class=o >.</span><span class=n >_table</span><span class=o >.</span><span class=n >TableData</span><span class=p >)]</span>
+    <span class=k >if</span> <span class=n >dtype</span> <span class=ow >in</span> <span class=n >args</span><span class=p >:</span>
+        <span class=k >return</span> <span class=n >widgets</span><span class=o >.</span><span class=n >Table</span><span class=p >,</span> <span class=p >{}</span>
+
+    <span class=k >return</span> <span class=kc >None</span>
+
+
+<span class=k >def</span> <span class=nf >return_widget_type</span><span class=p >(</span>
+    <span class=n >value</span><span class=p >:</span> <span class=n >Any</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
+    <span class=n >annotation</span><span class=p >:</span> <span class=nb >type</span> <span class=o >|</span> <span class=kc >None</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
+    <span class=n >options</span><span class=p >:</span> <span class=n >WidgetOptions</span> <span class=o >|</span> <span class=kc >None</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
+<span class=p >)</span> <span class=o >-&gt;</span> <span class=n >WidgetTuple</span><span class=p >:</span>
+    <span class=sd >"""Pick the appropriate widget type for ``value`` with ``annotation``."""</span>
+    <span class=n >options</span> <span class=o >=</span> <span class=n >options</span> <span class=ow >or</span> <span class=p >{}</span>
+    <span class=n >annotation</span> <span class=o >=</span> <span class=n >_evaluate_forwardref</span><span class=p >(</span><span class=n >annotation</span><span class=p >)</span>
+    <span class=n >dtype</span><span class=p >,</span> <span class=n >optional</span> <span class=o >=</span> <span class=n >_normalize_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span>
+    <span class=k >if</span> <span class=n >optional</span><span class=p >:</span>
+        <span class=n >options</span><span class=o >.</span><span class=n >setdefault</span><span class=p >(</span><span class=s2 >"nullable"</span><span class=p >,</span> <span class=kc >True</span><span class=p >)</span>
+    <span class=n >choices</span> <span class=o >=</span> <span class=n >options</span><span class=o >.</span><span class=n >get</span><span class=p >(</span><span class=s2 >"choices"</span><span class=p >)</span> <span class=ow >or</span> <span class=p >(</span><span class=nb >isinstance</span><span class=p >(</span><span class=n >dtype</span><span class=p >,</span> <span class=n >EnumMeta</span><span class=p >)</span> <span class=ow >and</span> <span class=n >dtype</span><span class=p >)</span>
+
+    <span class=k >if</span> <span class=s2 >"widget_type"</span> <span class=ow >in</span> <span class=n >options</span><span class=p >:</span>
+        <span class=n >widget_type</span> <span class=o >=</span> <span class=n >options</span><span class=o >.</span><span class=n >pop</span><span class=p >(</span><span class=s2 >"widget_type"</span><span class=p >)</span>
+        <span class=k >if</span> <span class=n >choices</span><span class=p >:</span>
+            <span class=k >if</span> <span class=n >widget_type</span> <span class=o >==</span> <span class=s2 >"RadioButton"</span><span class=p >:</span>
+                <span class=n >widget_type</span> <span class=o >=</span> <span class=s2 >"RadioButtons"</span>
+                <span class=n >warnings</span><span class=o >.</span><span class=n >warn</span><span class=p >(</span>
+                    <span class=sa >f</span><span class=s2 >"widget_type of 'RadioButton' (with dtype </span><span class=si >{</span><span class=n >dtype</span><span class=si >}</span><span class=s2 >) is being "</span>
+                    <span class=s2 >"coerced to 'RadioButtons' due to choices or Enum type."</span><span class=p >,</span>
+                    <span class=n >stacklevel</span><span class=o >=</span><span class=mi >2</span><span class=p >,</span>
+                <span class=p >)</span>
+            <span class=n >options</span><span class=o >.</span><span class=n >setdefault</span><span class=p >(</span><span class=s2 >"choices"</span><span class=p >,</span> <span class=n >choices</span><span class=p >)</span>
+        <span class=k >return</span> <span class=n >widget_type</span><span class=p >,</span> <span class=n >options</span>
+
+    <span class=c1 ># look for subclasses</span>
+    <span class=k >for</span> <span class=n >registered_type</span> <span class=ow >in</span> <span class=n >_TYPE_DEFS</span><span class=p >:</span>
+        <span class=k >if</span> <span class=n >dtype</span> <span class=o >==</span> <span class=n >registered_type</span> <span class=ow >or</span> <span class=n >_is_subclass</span><span class=p >(</span><span class=n >dtype</span><span class=p >,</span> <span class=n >registered_type</span><span class=p >):</span>
+            <span class=n >_cls</span><span class=p >,</span> <span class=n >opts</span> <span class=o >=</span> <span class=n >_TYPE_DEFS</span><span class=p >[</span><span class=n >registered_type</span><span class=p >]</span>
+            <span class=k >return</span> <span class=n >_cls</span><span class=p >,</span> <span class=p >{</span><span class=o >**</span><span class=n >options</span><span class=p >,</span> <span class=o >**</span><span class=n >opts</span><span class=p >}</span>  <span class=c1 ># type: ignore</span>
+
+    <span class=k >for</span> <span class=n >matcher</span> <span class=ow >in</span> <span class=n >_RETURN_MATCHERS</span><span class=p >:</span>
+        <span class=n >_widget_type</span> <span class=o >=</span> <span class=n >matcher</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >)</span>
+        <span class=k >if</span> <span class=n >_widget_type</span><span class=p >:</span>
+            <span class=n >_cls</span><span class=p >,</span> <span class=n >opts</span> <span class=o >=</span> <span class=n >_widget_type</span>
+            <span class=k >return</span> <span class=n >_cls</span><span class=p >,</span> <span class=p >{</span><span class=o >**</span><span class=n >options</span><span class=p >,</span> <span class=o >**</span><span class=n >opts</span><span class=p >}</span>  <span class=c1 ># type: ignore</span>
+
+    <span class=c1 ># Chosen for backwards/test compatibility</span>
+    <span class=k >return</span> <span class=n >widgets</span><span class=o >.</span><span class=n >LineEdit</span><span class=p >,</span> <span class=p >{</span><span class=s2 >"gui_only"</span><span class=p >:</span> <span class=kc >True</span><span class=p >}</span>
+
+
 <div class=viewcode-block  id=get_widget_class ><a class=viewcode-back  href="../../api/_autosummary/magicgui.type_map.get_widget_class.html#magicgui.type_map.get_widget_class">[docs]</a><span class=k >def</span> <span class=nf >get_widget_class</span><span class=p >(</span>
     <span class=n >value</span><span class=p >:</span> <span class=n >Any</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
     <span class=n >annotation</span><span class=p >:</span> <span class=nb >type</span> <span class=o >|</span> <span class=kc >None</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
     <span class=n >options</span><span class=p >:</span> <span class=n >WidgetOptions</span> <span class=o >|</span> <span class=kc >None</span> <span class=o >=</span> <span class=kc >None</span><span class=p >,</span>
+    <span class=n >is_result</span><span class=p >:</span> <span class=nb >bool</span> <span class=o >=</span> <span class=kc >False</span><span class=p >,</span>
 <span class=p >)</span> <span class=o >-&gt;</span> <span class=nb >tuple</span><span class=p >[</span><span class=n >WidgetClass</span><span class=p >,</span> <span class=n >WidgetOptions</span><span class=p >]:</span>
     <span class=sd >"""Return a WidgetClass appropriate for the given parameters.</span>
 
@@ -242,6 +337,9 @@
 <span class=sd >        A type annotation, by default None</span>
 <span class=sd >    options : WidgetOptions, optional</span>
 <span class=sd >        Options to pass when constructing the widget, by default {}</span>
+<span class=sd >    is_result : bool, optional</span>
+<span class=sd >        Identifies whether the returned widget should be tailored to</span>
+<span class=sd >        an input or to an output.</span>
 
 <span class=sd >    Returns</span>
 <span class=sd >    -------</span>
@@ -250,7 +348,10 @@
 <span class=sd >        may be different than the options passed in.</span>
 <span class=sd >    """</span>
     <span class=n >_options</span> <span class=o >=</span> <span class=n >cast</span><span class=p >(</span><span class=n >WidgetOptions</span><span class=p >,</span> <span class=n >options</span><span class=p >)</span>
-    <span class=n >widget_type</span><span class=p >,</span> <span class=n >_options</span> <span class=o >=</span> <span class=n >pick_widget_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >,</span> <span class=n >_options</span><span class=p >)</span>
+    <span class=k >if</span> <span class=n >is_result</span><span class=p >:</span>
+        <span class=n >widget_type</span><span class=p >,</span> <span class=n >_options</span> <span class=o >=</span> <span class=n >return_widget_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >,</span> <span class=n >_options</span><span class=p >)</span>
+    <span class=k >else</span><span class=p >:</span>
+        <span class=n >widget_type</span><span class=p >,</span> <span class=n >_options</span> <span class=o >=</span> <span class=n >pick_widget_type</span><span class=p >(</span><span class=n >value</span><span class=p >,</span> <span class=n >annotation</span><span class=p >,</span> <span class=n >_options</span><span class=p >)</span>
 
     <span class=k >if</span> <span class=nb >isinstance</span><span class=p >(</span><span class=n >widget_type</span><span class=p >,</span> <span class=nb >str</span><span class=p >):</span>
         <span class=n >widget_class</span><span class=p >:</span> <span class=n >WidgetClass</span> <span class=o >=</span> <span class=n >_import_class</span><span class=p >(</span><span class=n >widget_type</span><span class=p >)</span>
